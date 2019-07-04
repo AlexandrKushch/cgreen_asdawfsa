@@ -132,34 +132,11 @@ int main()
 	       result_segment.y1, result_segment.x2, result_segment.y2);
 
 	printf("---------------------------------day05------------------------------------\n");
-	size_t N = 10;
-	struct star stars[N];
-	size_t max_x = N + N;
-	size_t max_y = N + N;
-	int count_center = 0;
+	// size_t N = 10;
+	// struct star stars[N];
+	// size_t max_x = N + N;
+	// size_t max_y = N + N;
+	// int count_center = 0;
 
-	generate_sky_random(stars, N, max_x, max_y);
-	for(int i = 0; i < N; i++){
-		printf("X: %f, Y: %f\n", stars[i].location.x, stars[i].location.y);
-	}
-
-	for(int i = 0; i < N; i++){
-		for(int j = i + 1; j < N; j++){
-			if((stars[i].location.x != stars[j].location.x) || (stars[i].location.y != stars[j].location.y)){
-				printf("%i) All right\n", j);
-			}
-			else{
-				printf("I: %i, J: %i\n", i, j);
-			}
-		}
-	}
-
-	for(int i = 0; i < N; i++){
-		if(stars[i].is_center){
-			count_center++;
-		}
-	}
-	printf("Is center %i\n", stars[1].is_center);
-	printf("Count %i\n", count_center);
 	return 0;
 }

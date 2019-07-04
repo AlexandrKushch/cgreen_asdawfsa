@@ -9,6 +9,7 @@
 #define ROTATE_CENTER 4
 #define NUM_AFTER_POINT 2
 #define ZOOM_SIZE 6
+#define CENTER_ONLY_ONE 1
 
 Describe(Rotate);
 BeforeEach(Rotate)
@@ -129,7 +130,8 @@ Ensure(Rotate, zoom)
 	}
 }
 
-Ensure(Rotate, generate_sky_random){
+Ensure(Rotate, generate_sky_random)
+{
 	size_t N = 10;
 	struct star stars[N];
 	size_t max_x = N;
@@ -138,25 +140,55 @@ Ensure(Rotate, generate_sky_random){
 
 	generate_sky_random(stars, N, max_x, max_y);
 
-	for(size_t i = 0; i < N; i++){
-		// Center is only one ?
-		// if(stars[i].is_center){
-		// 	count_center++;
-		// }
-		assert_that(stars[i].location.x, is_less_than(max_x));
-		assert_that(stars[i].location.y, is_less_than(max_y));
-
-		for(size_t j = i + 1; j < N; j++){
-			assert_that(stars[i].location.x != stars[j].location.x || stars[i].location.y != stars[j].location.y);
-		}
-	}
-	for(int i = 0; i < N; i=i+1){
-		if(stars[i].is_center){
+	for (size_t i = 0; i < N; i++) {
+		if (stars[i].is_center) {
 			count_center++;
 		}
+
+		assert_that(stars[i].location.x, is_less_than(max_x));
+		assert_that(stars[i].location.y, is_less_than(max_y));
+		assert_that(stars[i].location.x >= 0);
+		assert_that(stars[i].location.y >= 0);
+
+		for (size_t j = i + 1; j < N; j++) {
+			assert_that(stars[i].location.x !=
+					    stars[j].location.x ||
+				    stars[i].location.y != stars[j].location.y);
+		}
 	}
-	printf("Is center %i\n", stars[2].is_center);
-	assert_that(count_center, is_equal_to(1));
+	assert_that(count_center, is_equal_to(CENTER_ONLY_ONE));
+}
+
+Ensure(Rotate, get_sky_center)
+{
+	size_t size = 10;
+	struct star stars[size];
+
+	generate_sky_random(stars, size, size, size);
+
+	for(int i = 0; i < size; i++){
+		stars[i].is_center = false;
+	}
+
+	struct point_cartesian expect1 = { 0, 0 }; // When not find center
+	struct point_cartesian expect2 = { 2,
+					   2 }; // When two and bigger centers
+	struct point_cartesian expect3 = { 3, 3 }; // When only one center
+
+	struct point_cartesian actual1 = get_sky_center(stars, size);
+	assert_that_point(actual1, expect1);
+
+	stars[0].is_center = true;
+	stars[1].is_center = true;
+	stars[1].location.x = stars[1].location.y = 2;
+	struct point_cartesian actual2 = get_sky_center(stars, size);
+	assert_that_point(actual2, expect2);
+
+	stars[0].is_center = false;
+	stars[1].is_center = true;
+	stars[1].location.x = stars[1].location.y = 3;
+	struct point_cartesian actual3 = get_sky_center(stars, size);
+	assert_that_point(actual3, expect3);
 }
 
 int main()
@@ -169,6 +201,7 @@ int main()
 	add_test_with_context(suite, Rotate, zoom);
 
 	add_test_with_context(suite, Rotate, generate_sky_random);
+	add_test_with_context(suite, Rotate, get_sky_center);
 
 	return run_test_suite(suite, create_text_reporter());
 }
